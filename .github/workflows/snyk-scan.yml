@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
  
 jobs:
-  security-literate-octo-guacamole:
+  security-PWSS-DirectoryNav:
     uses: pwssOrg/reusable-workflows/.github/workflows/sca_scan_base.yml@main
     with:
        working-path: DirectoryNav
