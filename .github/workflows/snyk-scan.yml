@@ -1,0 +1,17 @@
+name: SCA Scan - PWSS-DirectoryNav
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+ 
+jobs:
+  security-literate-octo-guacamole:
+    uses: pwssOrg/reusable-workflows/.github/workflows/sca_scan_base.yml@main
+    with:
+       working-path: DirectoryNav
+       name-of-snyk-step: Check for vulnerabilities in PWSS-DirectoryNav
+    secrets:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
