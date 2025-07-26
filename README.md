@@ -1,12 +1,13 @@
 # PWSS-DirectoryNav
-
-![desert-road-winds-between-red-rock-formations]()
-
-A powerful and efficient library for traversing directories and subdirectories to retrieve file paths, tailored
-for applications like file integrity scanning within the PWSS family.
-
 [![Makefile CI](https://github.com/pwssOrg/PWSS-DirectoryNav/actions/workflows/build.yml/badge.svg)](https://github.com/pwssOrg/PWSS-DirectoryNav/actions/workflows/build.yml)
 [![SCA Scan - PWSS-DirectoryNav](https://github.com/pwssOrg/PWSS-DirectoryNav/actions/workflows/snyk-scan.yml/badge.svg)](https://github.com/pwssOrg/PWSS-DirectoryNav/actions/workflows/snyk-scan.yml)
+
+<i>A powerful and efficient library for traversing directories and subdirectories to retrieve file paths, tailored
+for applications like file integrity scanning within the PWSS family. </i>
+
+![desert-road-winds-between-red-rock-formations](https://github.com/pwssOrg/PWSS-DirectoryNav/blob/Readme-for-PWSS-DirectoryNav-72/.github/assets/images/Jennifer_Burk_a-desert-road-winds-between-red-rock-formations_640x959.jpg?raw=true)
+
+
 
 ## Overview
 PWSS-DirectoryNav is designed to simplify directory navigation by providing an easy-to-use API that allows you to
