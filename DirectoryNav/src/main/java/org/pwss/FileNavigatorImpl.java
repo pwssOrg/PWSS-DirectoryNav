@@ -13,6 +13,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -34,6 +35,8 @@ import org.slf4j.LoggerFactory;
 public final class FileNavigatorImpl implements FileNavigator {
 
     private final org.slf4j.Logger log;
+
+    private final int THREAD_POOL_SIZE = 5;
 
     private final Path startPath;
 
@@ -75,7 +78,7 @@ public final class FileNavigatorImpl implements FileNavigator {
     public final List<Future<List<Path>>> traverseFiles() throws IOException, InterruptedException {
 
         final List<Future<List<Path>>> futures = new ArrayList<>();
-        try (ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
+        try (ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE)) {
 
             try {
                 final FileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
@@ -134,6 +137,93 @@ public final class FileNavigatorImpl implements FileNavigator {
 
             return futures;
         }
+    }
+
+    public final Future<List<Path>> traverseFilesEasy() throws IOException {
+        List<Future<List<Path>>> futures = new ArrayList<>();
+        try (ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE)) {
+
+            try {
+                FileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                        return FileVisitResult.CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+                        if (Files.isDirectory(dir) && Files.isReadable(dir)) {
+                            futures.add(executor.submit(() -> {
+                                List<Path> visitedPaths = new ArrayList<>();
+                                try (Stream<Path> stream = Files.walk(dir)) {
+                                    stream.filter(Files::isRegularFile)
+                                            .forEach(visitedPaths::add);
+                                } catch (IOException e) {
+                                    log.error("Error traversing directory: {} - {}", dir, e.getMessage());
+                                }
+                                return visitedPaths;
+                            }));
+                        }
+                        return FileVisitResult.SKIP_SIBLINGS;
+                    }
+
+                    @Override
+                    public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                        log.error("Error accessing file: {} - {}", file, exc.getMessage());
+                        return FileVisitResult.SKIP_SUBTREE;
+                    }
+                };
+
+                Files.walkFileTree(startPath, visitor);
+
+            } catch (AccessDeniedException e) {
+                log.error("Access Denied: {} - {}", startPath, e.getMessage());
+            } catch (NoSuchFileException e) {
+                log.error("File Not Found: {} - {}", startPath, e.getMessage());
+            } catch (IOException e) {
+                log.error("IO Exception: {} - {}", startPath, e.getMessage());
+            }
+
+            Future<List<Path>> singleFuture = null;
+            try {
+
+                // Collect all paths from futures into a single list
+                singleFuture = executor.submit(() -> {
+                    List<Path> allPaths = new ArrayList<>();
+                    for (Future<List<Path>> future : futures) {
+                        try {
+                            allPaths.addAll(future.get());
+                        } catch (InterruptedException | ExecutionException e) {
+                            log.error("Error retrieving paths: {}", e.getMessage());
+                        }
+                    }
+                    return allPaths;
+                });
+            } catch (Exception e) {
+
+                log.error("Error: {}", e.getMessage());
+            }
+
+            finally {
+                if (executor != null) {
+                    executor.shutdown();
+
+                    try {
+                        if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                            log.warn("Executor did not terminate within the expected time frame.");
+                        }
+                    } catch (InterruptedException e) {
+                        log.error("Interrupted while waiting for executor to shut down: {}", e.getMessage());
+                        Thread.currentThread().interrupt();
+                    }
+                }
+
+            }
+
+            return singleFuture;
+
+        }
+
     }
 
     @Override
