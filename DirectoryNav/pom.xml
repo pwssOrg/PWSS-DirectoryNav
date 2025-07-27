@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>lib.pwss</groupId>
-    <artifactId>DirectoryNav</artifactId>
+    <artifactId>directory_nav</artifactId>
     <version>1.0</version>
     <description>This library provides functionality to traverse files within a specified directory and its subdirectories. 
 </description>
