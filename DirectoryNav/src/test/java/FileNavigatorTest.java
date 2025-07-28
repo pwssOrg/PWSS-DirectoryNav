@@ -3,7 +3,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,8 +28,16 @@ public class FileNavigatorTest {
         FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
         try {
             // When
-            List<Future<List<Path>>> futures = fileNavigator.traverseFiles();
-            for (Future<List<Path>> future : futures) {
+            Future<List<Future<List<Path>>>> futures = fileNavigator.traverseFiles();
+
+            while (!futures.isDone()) {
+                System.out.println("Future 1 is working...");
+                Thread.sleep(200);
+
+            }
+
+            System.out.println("Future for test 1 is complete!");
+            for (Future<List<Path>> future : futures.get()) {
 
                 List<Path> paths = future.get();
                 if (paths != null && !paths.isEmpty()) {
@@ -73,7 +80,18 @@ public class FileNavigatorTest {
 
         try {
             // When
-            Future<List<Path>> future = fileNavigator.traverseFilesEasy();
+            Future<Future<List<Path>>> futureReturn = fileNavigator.traverseFilesEasy();
+            Future<List<Path>> future = futureReturn.get();
+
+            while (!future.isDone()) {
+
+                System.out.println("Future 2 is working...");
+                Thread.sleep(200);
+            }
+
+            System.out.println("Future for test 2 is complete!");
+
+            futureReturn.get();
 
             List<Path> paths = future.get();
             if (paths != null && !paths.isEmpty()) {

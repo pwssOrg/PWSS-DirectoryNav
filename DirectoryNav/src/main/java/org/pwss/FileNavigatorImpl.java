@@ -13,6 +13,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -79,92 +80,113 @@ public final class FileNavigatorImpl implements FileNavigator {
     }
 
     @Override
-    public final List<Future<List<Path>>> traverseFiles() throws IOException, InterruptedException {
-
+    public final Future<List<Future<List<Path>>>> traverseFiles() throws IOException, InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
         final List<Future<List<Path>>> futures = new ArrayList<>();
-        try (ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE)) {
 
-            try {
-                final FileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
-                    @Override
-                    public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
-                        return FileVisitResult.CONTINUE;
-                    }
+        Future<List<Future<List<Path>>>> lisFuture = executor.submit(new Callable<List<Future<List<Path>>>>() {
 
-                    @Override
-                    public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) {
-                        if (Files.isDirectory(dir) && Files.isReadable(dir)) {
-                            futures.add(executor.submit(() -> {
-                                final List<Path> visitedPaths = new ArrayList<>();
-                                try (Stream<Path> stream = Files.walk(dir)) {
-                                    stream.filter(Files::isRegularFile)
-                                            .forEach(visitedPaths::add);
-                                } catch (final IOException e) {
-                                    log.error("Error traversing directory: {} - {}", dir, e.getMessage());
-                                }
-                                return visitedPaths;
-                            }));
+            @Override
+            public List<Future<List<Path>>> call() throws Exception {
+
+                try {
+                    final FileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
+                        @Override
+                        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
+                            return FileVisitResult.CONTINUE;
                         }
-                        return FileVisitResult.SKIP_SIBLINGS;
-                    }
 
-                    @Override
-                    public FileVisitResult visitFileFailed(final Path file, final IOException exc) throws IOException {
-                        log.error("Error accessing file: {} - {}", file, exc.getMessage());
-                        return FileVisitResult.SKIP_SUBTREE;
-                    }
-                };
+                        @Override
+                        public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) {
+                            if (Files.isDirectory(dir) && Files.isReadable(dir)) {
+                                futures.add(executor.submit(() -> {
+                                    final List<Path> visitedPaths = new ArrayList<>();
+                                    try (Stream<Path> stream = Files.walk(dir)) {
+                                        stream.filter(Files::isRegularFile)
+                                                .forEach(visitedPaths::add);
+                                    } catch (final IOException e) {
+                                        log.error("Error traversing directory: {} - {}", dir, e.getMessage());
+                                    }
+                                    return visitedPaths;
+                                }));
+                            }
+                            return FileVisitResult.SKIP_SIBLINGS;
+                        }
 
-                Files.walkFileTree(startPath, visitor);
+                        @Override
+                        public FileVisitResult visitFileFailed(final Path file, final IOException exc)
+                                throws IOException {
+                            log.error("Error accessing file: {} - {}", file, exc.getMessage());
+                            return FileVisitResult.SKIP_SUBTREE;
+                        }
+                    };
 
-            } catch (final AccessDeniedException e) {
-                log.error("Access Denied: {} - {}", startPath, e.getMessage());
-            } catch (final NoSuchFileException e) {
-                log.error("File Not Found: {} - {}", startPath, e.getMessage());
-            } catch (final IOException e) {
-                log.error("IO Exception: {} - {}", startPath, e.getMessage());
-            } finally {
+                    Files.walkFileTree(startPath, visitor);
 
-                executorReference = executor;
+                } catch (final AccessDeniedException e) {
+                    log.error("Access Denied: {} - {}", startPath, e.getMessage());
+                } catch (final NoSuchFileException e) {
+                    log.error("File Not Found: {} - {}", startPath, e.getMessage());
+                } catch (final IOException e) {
+                    log.error("IO Exception: {} - {}", startPath, e.getMessage());
+                } finally {
+
+                    executorReference = executor;
+                }
+
+                return futures;
             }
 
-            return futures;
-        }
+        });
+
+        return lisFuture;
+
     }
 
     @Override
-    public final Future<List<Path>> traverseFilesEasy() throws IOException, InterruptedException {
-        List<Future<List<Path>>> futures = traverseFiles();
+    public final Future<Future<List<Path>>> traverseFilesEasy()
+            throws IOException, InterruptedException, ExecutionException {
 
-        try (ExecutorService executorOneThread = Executors.newSingleThreadExecutor()) {
+        ExecutorService executorOneThread = Executors.newSingleThreadExecutor();
 
-            Future<List<Path>> singleFuture = null;
-            try {
+        Future<Future<List<Path>>> lisFuture2 = executorOneThread.submit(new Callable<Future<List<Path>>>() {
 
-                // Collect all paths from futures into a single list
-                singleFuture = executorOneThread.submit(() -> {
-                    List<Path> allPaths = new ArrayList<>();
-                    for (Future<List<Path>> future : futures) {
-                        try {
-                            allPaths.addAll(future.get());
-                        } catch (InterruptedException | ExecutionException e) {
-                            log.error("Error retrieving paths: {}", e.getMessage());
+            @Override
+            public Future<List<Path>> call() throws Exception {
+
+                Future<List<Future<List<Path>>>> futures1 = traverseFiles();
+
+                List<Future<List<Path>>> futures = futures1.get();
+
+                Future<List<Path>> singleFuture = null;
+                try {
+
+                    // Collect all paths from futures into a single list
+                    singleFuture = executorOneThread.submit(() -> {
+                        List<Path> allPaths = new ArrayList<>();
+                        for (Future<List<Path>> future : futures) {
+                            try {
+                                allPaths.addAll(future.get());
+                            } catch (InterruptedException | ExecutionException e) {
+                                log.error("Error retrieving paths: {}", e.getMessage());
+                            }
                         }
-                    }
-                    return allPaths;
-                });
-            } catch (Exception e) {
+                        return allPaths;
+                    });
+                } catch (Exception e) {
 
-                log.error("Error: {}", e.getMessage());
+                    log.error("Error: {}", e.getMessage());
+                }
+
+                finally {
+                    singleExecutorReference = executorOneThread;
+                }
+
+                return singleFuture;
+
             }
-
-            finally {
-                singleExecutorReference = executorOneThread;
-            }
-
-            return singleFuture;
-        }
-
+        });
+        return lisFuture2;
     }
 
     @Override

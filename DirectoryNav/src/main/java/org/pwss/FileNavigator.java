@@ -3,6 +3,7 @@ package org.pwss;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -29,7 +30,7 @@ public interface FileNavigator {
      * This approach allows clients to handle different directories individually,
      * potentially improving performance and responsiveness for large file systems.
      *
-     * @return A list of futures, where each future represents the result of
+     * @return A Future list of futures, where each future represents the result of
      *         traversing a portion of the file system. Each future contains a list
      *         of file paths (Path objects) found during that portion's traversal.
      * @throws IOException          if an I/O error occurs while reading from or
@@ -39,7 +40,7 @@ public interface FileNavigator {
      *                              waiting
      *                              for the completion of a subtask.
      */
-    List<Future<List<Path>>> traverseFiles() throws IOException, InterruptedException;
+    Future<List<Future<List<Path>>>> traverseFiles() throws IOException, InterruptedException;
 
     /**
      * Traverses files in a non-recursive (Java method) manner using an executor
@@ -54,7 +55,8 @@ public interface FileNavigator {
      * directories within the chosen directory have been traversed.
      *
      * @return A future that represents the result of traversing the file system.
-     *         The future contains a list of file paths (Path objects) found during
+     *         The future contains a future that contains a list of file paths (Path
+     *         objects) found during
      *         the traversal.
      * @throws IOException          if an I/O error occurs while reading from or
      *                              writing to
@@ -63,7 +65,7 @@ public interface FileNavigator {
      *                              waiting
      *                              for the completion of the task.
      */
-    Future<List<Path>> traverseFilesEasy() throws IOException, InterruptedException;
+    Future<Future<List<Path>>> traverseFilesEasy() throws IOException, InterruptedException, ExecutionException;
 
     /**
      * This method should be invoked after all futures have been retrieved from the
