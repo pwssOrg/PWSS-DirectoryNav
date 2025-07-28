@@ -7,7 +7,7 @@ import java.util.concurrent.Future;
 
 /**
  * The FileNavigator interface provides methods for traversing files in a
- * non-recursive,
+ * non-recursive (Java method),
  * multithreaded manner. This is particularly useful for handling large
  * directory structures
  * efficiently, preventing stack overflow errors that can occur with recursive
@@ -16,7 +16,8 @@ import java.util.concurrent.Future;
 public interface FileNavigator {
 
     /**
-     * Traverses files in a non-recursive manner using a multithreaded approach.
+     * Traverses files in a non-recursive (Java method) manner using a multithreaded
+     * approach.
      * This method is designed to handle large directory structures efficiently,
      * preventing stack overflow errors that can occur with recursive traversal.
      *
@@ -41,7 +42,8 @@ public interface FileNavigator {
     List<Future<List<Path>>> traverseFiles() throws IOException, InterruptedException;
 
     /**
-     * Traverses files in a non-recursive manner using an executor service and a
+     * Traverses files in a non-recursive (Java method) manner using an executor
+     * service and a
      * thread pool. This method provides a simpler usage pattern by returning just
      * one future representing the completion of all traversal tasks.
      *
@@ -54,11 +56,39 @@ public interface FileNavigator {
      * @return A future that represents the result of traversing the file system.
      *         The future contains a list of file paths (Path objects) found during
      *         the traversal.
-     * @throws IOException if an I/O error occurs while reading from or writing to
-     *                    the file or directory.
-     * @throws InterruptedException if the current thread is interrupted while waiting
+     * @throws IOException          if an I/O error occurs while reading from or
+     *                              writing to
+     *                              the file or directory.
+     * @throws InterruptedException if the current thread is interrupted while
+     *                              waiting
      *                              for the completion of the task.
      */
     Future<List<Path>> traverseFilesEasy() throws IOException, InterruptedException;
+
+    /**
+     * This method should be invoked after all futures have been retrieved from the
+     * client
+     * following a method invocation of {@link #traverseFiles()}. It is responsible
+     * for shutting
+     * down the fixed-size thread pool (size 5) used during traversal.
+     *
+     * @return A boolean that represents the success of shutting down the fixed-size
+     *         to 5 thread pool.
+     */
+    boolean shutdownDirectoryNavThreadPool();
+
+    /**
+     * This method should be invoked after all futures have been retrieved from the
+     * client
+     * following a method invocation of {@link #traverseFilesEasy()}. It is
+     * responsible for shutting
+     * down both the single thread pool and the fixed-size to 5 thread pool used
+     * during traversal.
+     *
+     * @return A boolean that represents the success of shutting down the single
+     *         thread pool and the fixed-size to
+     *         5 thread pool.
+     */
+    boolean shutdownEasyFileTraverserThread();
 
 }

@@ -38,6 +38,10 @@ public final class FileNavigatorImpl implements FileNavigator {
 
     private final int THREAD_POOL_SIZE = 5;
 
+    private ExecutorService executorReference;
+
+    private ExecutorService singleExecutorReference;
+
     private final Path startPath;
 
     /**
@@ -121,74 +125,24 @@ public final class FileNavigatorImpl implements FileNavigator {
                 log.error("IO Exception: {} - {}", startPath, e.getMessage());
             } finally {
 
-                if (executor != null) {
-                    executor.shutdown();
-                    try {
-                        // This will block until all tasks have completed execution
-                        if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-                            log.warn("Executor did not terminate within the expected time frame.");
-                        }
-                    } catch (InterruptedException e) {
-                        log.error("Interrupted while waiting for executor to shut down: {}", e.getMessage());
-                        Thread.currentThread().interrupt(); // Preserve interrupt status
-                    }
-                }
+                executorReference = executor;
             }
 
             return futures;
         }
     }
 
-    public final Future<List<Path>> traverseFilesEasy() throws IOException {
-        List<Future<List<Path>>> futures = new ArrayList<>();
-        try (ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE)) {
+    @Override
+    public final Future<List<Path>> traverseFilesEasy() throws IOException, InterruptedException {
+        List<Future<List<Path>>> futures = traverseFiles();
 
-            try {
-                FileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
-                    @Override
-                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                        return FileVisitResult.CONTINUE;
-                    }
-
-                    @Override
-                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-                        if (Files.isDirectory(dir) && Files.isReadable(dir)) {
-                            futures.add(executor.submit(() -> {
-                                List<Path> visitedPaths = new ArrayList<>();
-                                try (Stream<Path> stream = Files.walk(dir)) {
-                                    stream.filter(Files::isRegularFile)
-                                            .forEach(visitedPaths::add);
-                                } catch (IOException e) {
-                                    log.error("Error traversing directory: {} - {}", dir, e.getMessage());
-                                }
-                                return visitedPaths;
-                            }));
-                        }
-                        return FileVisitResult.SKIP_SIBLINGS;
-                    }
-
-                    @Override
-                    public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                        log.error("Error accessing file: {} - {}", file, exc.getMessage());
-                        return FileVisitResult.SKIP_SUBTREE;
-                    }
-                };
-
-                Files.walkFileTree(startPath, visitor);
-
-            } catch (AccessDeniedException e) {
-                log.error("Access Denied: {} - {}", startPath, e.getMessage());
-            } catch (NoSuchFileException e) {
-                log.error("File Not Found: {} - {}", startPath, e.getMessage());
-            } catch (IOException e) {
-                log.error("IO Exception: {} - {}", startPath, e.getMessage());
-            }
+        try (ExecutorService executorOneThread = Executors.newSingleThreadExecutor()) {
 
             Future<List<Path>> singleFuture = null;
             try {
 
                 // Collect all paths from futures into a single list
-                singleFuture = executor.submit(() -> {
+                singleFuture = executorOneThread.submit(() -> {
                     List<Path> allPaths = new ArrayList<>();
                     for (Future<List<Path>> future : futures) {
                         try {
@@ -205,25 +159,68 @@ public final class FileNavigatorImpl implements FileNavigator {
             }
 
             finally {
-                if (executor != null) {
-                    executor.shutdown();
-
-                    try {
-                        if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-                            log.warn("Executor did not terminate within the expected time frame.");
-                        }
-                    } catch (InterruptedException e) {
-                        log.error("Interrupted while waiting for executor to shut down: {}", e.getMessage());
-                        Thread.currentThread().interrupt();
-                    }
-                }
-
+                singleExecutorReference = executorOneThread;
             }
 
             return singleFuture;
+        }
+
+    }
+
+    @Override
+    public final boolean shutdownDirectoryNavThreadPool() {
+
+        Boolean result = null;
+        if (executorReference != null) {
+            executorReference.shutdown();
+            try {
+                // This will block until all tasks have completed execution
+                result = executorReference.awaitTermination(60, TimeUnit.SECONDS);
+                if (!result) {
+                    log.warn("Executor did not terminate within the expected time frame.");
+                }
+            } catch (InterruptedException e) {
+                log.error("Interrupted while waiting for executor to shut down: {}", e.getMessage());
+                Thread.currentThread().interrupt(); // Preserve interrupt status
+            }
 
         }
 
+        if (result == null)
+            return true;
+        else
+            return result;
+    }
+
+    @Override
+    public final boolean shutdownEasyFileTraverserThread() {
+
+        Boolean invokedMethodResult = shutdownDirectoryNavThreadPool();
+
+        Boolean result = null;
+        if (singleExecutorReference != null) {
+            singleExecutorReference.shutdown();
+            try {
+                // This will block until all tasks have completed execution
+                result = singleExecutorReference.awaitTermination(60, TimeUnit.SECONDS);
+                if (!result) {
+                    log.warn("Executor did not terminate within the expected time frame.");
+                }
+            } catch (InterruptedException e) {
+                log.error("Interrupted while waiting for executor to shut down: {}", e.getMessage());
+                Thread.currentThread().interrupt(); // Preserve interrupt status
+            }
+
+        }
+
+        if (result == null && invokedMethodResult == null)
+            return true;
+        else if (invokedMethodResult == null)
+            return false;
+        else if (result == null)
+            return false;
+        else
+            return result;
     }
 
     @Override

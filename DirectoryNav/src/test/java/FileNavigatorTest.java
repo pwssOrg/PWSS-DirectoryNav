@@ -3,6 +3,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,11 +26,12 @@ public class FileNavigatorTest {
         final int expectedNumberOfFiles = 8;
 
         List<Path> foundPaths = new ArrayList<>();
-
+        FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
         try {
             // When
-            List<Future<List<Path>>> futures = new FileNavigatorImpl(myTestPath).traverseFiles();
+            List<Future<List<Path>>> futures = fileNavigator.traverseFiles();
             for (Future<List<Path>> future : futures) {
+
                 List<Path> paths = future.get();
                 if (paths != null && !paths.isEmpty()) {
                     foundPaths.addAll(paths);
@@ -47,6 +49,13 @@ public class FileNavigatorTest {
             Assertions.fail("Test execution failed due to an exception: " + e.getCause().getMessage());
         }
 
+        finally {
+
+            // Must be called after all futures have either been retrieved or canceled.
+            fileNavigator.shutdownDirectoryNavThreadPool();
+
+        }
+
         // Then
         int actualNumberOfFiles = foundPaths.size();
         Assertions.assertEquals(expectedNumberOfFiles, actualNumberOfFiles);
@@ -60,14 +69,19 @@ public class FileNavigatorTest {
 
         List<Path> foundPaths = new ArrayList<>();
 
+        FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
+
         try {
             // When
-            Future<List<Path>> future = new FileNavigatorImpl(myTestPath).traverseFilesEasy();
+            Future<List<Path>> future = fileNavigator.traverseFilesEasy();
 
             List<Path> paths = future.get();
             if (paths != null && !paths.isEmpty()) {
                 foundPaths.addAll(paths);
             }
+
+            // Must be called after all futures have either been retrieved or canceled.
+            fileNavigator.shutdownEasyFileTraverserThread();
 
         } catch (IOException | InterruptedException e) {
             // Handle expected exceptions
