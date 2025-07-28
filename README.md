@@ -25,7 +25,7 @@ To include this library in your project, add the following dependency to your `p
 <dependency>
   <groupId>lib.pwss</groupId>
   <artifactId>directory_nav</artifactId>
-  <version>0.5</version>
+  <version>1.1</version>
 </dependency>
 ```
 
@@ -44,21 +44,24 @@ public class Main {
         Path directoryPath = Paths.get("your/directory/path");
         List<Path> foundPaths = new ArrayList<>();
 
+        FileNavigator fileNavigator = null;
         try {
             // Traverse files in the given directory
-            FileNavigator fileNavigator = new FileNavigatorImpl(directoryPath);
+            fileNavigator = new FileNavigatorImpl(directoryPath);
             List<Future<List<Path>>> futures = fileNavigator.traverseFiles();
 
             for (Future<List<Path>> future : futures) {
                 List<Path> paths = future.get();
                 if (paths != null && !paths.isEmpty()) {
                     foundPaths.addAll(paths);
-                    foundPaths.forEach(p -> System.out.println("PWSS Dir -> "+p.getFileName()));
+                    foundPaths.forEach(p -> System.out.println("PWSS Dir -> " + p.getFileName()));
                 }
             }
         } catch (Exception e) {
             // Handle exceptions
             System.err.println("Error: " + e.getMessage());
+        } finally {
+            fileNavigator.shutdownDirectoryNavThreadPool();
         }
     }
 }
