@@ -25,17 +25,81 @@ public class FileNavigatorTest {
         final int expectedNumberOfFiles = 8;
 
         List<Path> foundPaths = new ArrayList<>();
-
+        FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
         try {
             // When
-            List<Future<List<Path>>> futures = new FileNavigatorImpl(myTestPath).traverseFiles();
-            for (Future<List<Path>> future : futures) {
+            Future<List<Future<List<Path>>>> futures = fileNavigator.traverseFiles();
+
+            while (!futures.isDone()) {
+                System.out.println("Future 1 is working...");
+                Thread.sleep(200);
+
+            }
+
+            System.out.println("Future for test 1 is complete!");
+            for (Future<List<Path>> future : futures.get()) {
+
                 List<Path> paths = future.get();
                 if (paths != null && !paths.isEmpty()) {
                     foundPaths.addAll(paths);
-                    foundPaths.forEach(p -> System.out.println("PWSS Dir -> "+p.getFileName()));
+                    foundPaths.forEach(p -> System.out.println("PWSS Dir -> " + p.getFileName()));
                 }
             }
+
+        } catch (IOException | InterruptedException e) {
+            // Handle expected exceptions
+            System.err.println("Error: " + e.getMessage());
+            Assertions.fail("Test execution failed due to an exception: " + e.getMessage());
+        } catch (ExecutionException e) {
+            // Handle unexpected exceptions
+            System.err.println("Execution error: " + e.getCause().getMessage());
+            Assertions.fail("Test execution failed due to an exception: " + e.getCause().getMessage());
+        }
+
+        finally {
+
+            // Must be called after all futures have either been retrieved or canceled.
+            fileNavigator.shutdownDirectoryNavThreadPool();
+
+        }
+
+        // Then
+        int actualNumberOfFiles = foundPaths.size();
+        Assertions.assertEquals(expectedNumberOfFiles, actualNumberOfFiles);
+    }
+
+    @Test
+    public void testEasyFileTraversingThroughADirectoryWith8Files() {
+        // Given
+        final Path myTestPath = Paths.get("pwss_test_directory");
+        final int expectedNumberOfFiles = 8;
+
+        List<Path> foundPaths = new ArrayList<>();
+
+        FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
+
+        try {
+            // When
+            Future<Future<List<Path>>> futureReturn = fileNavigator.traverseFilesEasy();
+            Future<List<Path>> future = futureReturn.get();
+
+            while (!future.isDone()) {
+
+                System.out.println("Future 2 is working...");
+                Thread.sleep(200);
+            }
+
+            System.out.println("Future for test 2 is complete!");
+
+            futureReturn.get();
+
+            List<Path> paths = future.get();
+            if (paths != null && !paths.isEmpty()) {
+                foundPaths.addAll(paths);
+            }
+
+            // Must be called after all futures have either been retrieved or canceled.
+            fileNavigator.shutdownEasyFileTraverserThread();
 
         } catch (IOException | InterruptedException e) {
             // Handle expected exceptions
@@ -113,7 +177,7 @@ public class FileNavigatorTest {
 
         // Act & Assert
         assertEquals(fileNav1.hashCode(), fileNav2.hashCode(),
-                     "The hash codes of equal objects should be the same.");
+                "The hash codes of equal objects should be the same.");
     }
 
     @Test
@@ -126,6 +190,6 @@ public class FileNavigatorTest {
 
         // Act & Assert
         assertNotEquals(fileNav1.hashCode(), fileNav2.hashCode(),
-                        "The hash codes of different objects should not be the same.");
+                "The hash codes of different objects should not be the same.");
     }
 }
