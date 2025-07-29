@@ -25,7 +25,7 @@ To include this library in your project, add the following dependency to your `p
 <dependency>
   <groupId>lib.pwss</groupId>
   <artifactId>directory_nav</artifactId>
-  <version>1.1</version>
+  <version>1.2.future</version>
 </dependency>
 ```
 
@@ -33,34 +33,68 @@ To include this library in your project, add the following dependency to your `p
 Here is a simple example of how to use the library:
 
 ```java
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class Main {
-    public static void main(String[] args) {
-        Path directoryPath = Paths.get("your/directory/path");
-        List<Path> foundPaths = new ArrayList<>();
+    public static void main(String[] args) throws IOException {
 
-        FileNavigator fileNavigator = null;
+        Path myTestPath = Paths.get("C:\\Users\\PWSS\\" +
+                "Downloads\\ShredChat-master\\ShredChat-master");
+
+        FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
+
         try {
-            // Traverse files in the given directory
-            fileNavigator = new FileNavigatorImpl(directoryPath);
-            List<Future<List<Path>>> futures = fileNavigator.traverseFiles();
-
-            for (Future<List<Path>> future : futures) {
-                List<Path> paths = future.get();
-                if (paths != null && !paths.isEmpty()) {
-                    foundPaths.addAll(paths);
-                    foundPaths.forEach(p -> System.out.println("PWSS Dir -> " + p.getFileName()));
-                }
+            Future<List<Future<List<Path>>>> futures = fileNavigator.traverseFiles();
+            while (!futures.isDone()) {
+                System.out.println("Future working :) ...");
             }
-        } catch (Exception e) {
-            // Handle exceptions
-            System.err.println("Error: " + e.getMessage());
+            System.out.println("Future  has been good :) !");
+
+            Future<List<Path>> futureListOfPaths = futures.get().get(0);
+
+            // Get Future
+            List<Path> pathList = futureListOfPaths.get();
+
+            // Print all folders and directories (including the start folder)
+            futureListOfPaths.get().stream()
+                    .forEach(element -> System.out.println(element.toFile()
+                            .getAbsolutePath()));
+
+            /***
+             * If you want to print out the absolute paths of the files without any directories
+             */
+
+            //futureListOfPaths.get().stream()
+            // .filter(a -> !Files.isDirectory(a))
+            // .forEach(element -> System.out.println(element.toFile()
+            // .getAbsolutePath()));
+
+            /**
+             * In case you want to have a list of all paths
+             */
+
+            //List<Path> listOfPaths = futureListOfPaths.get().stream()
+            // .filter(a -> !Files.isDirectory(a)).toList();
+
+            System.out.println("Path Size including all folders and files" +
+                    " ( +1 initial / selected folder) -> "
+                    + pathList.size());
+            System.out.println("Path Size including only Files -> " + pathList.stream()
+                    .filter(only_files -> !Files.isDirectory(only_files)).toList().size());
+            System.out.println("Path Size including all folders and files" +
+                    " (except the initial / selected folder) -> "
+                    + (pathList.size() - 1));
+
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
         } finally {
+            // Must be called after all futures have either been retrieved or canceled.
             fileNavigator.shutdownDirectoryNavThreadPool();
         }
     }
@@ -68,7 +102,7 @@ public class Main {
 ```
 
 
-<img src="https://github.com/pwssOrg/PWSS-DirectoryNav/blob/Readme-for-PWSS-DirectoryNav-72/.github/assets/images/Jennifer_Burk_a-desert-road-winds-between-red-rock-formations_640x959.jpg" alt="drawing" width="640" height=959/>
+<img src="https://github.com/pwssOrg/PWSS-DirectoryNav/blob/main/.github/assets/images/Jennifer_Burk_a-desert-road-winds-between-red-rock-formations_640x959.jpg" alt="drawing" width="640" height=959/>
 <i>Always traverse quickly and gracefully - only then can you achieve full file integrity
 </i>
 
