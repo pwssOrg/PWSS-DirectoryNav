@@ -38,7 +38,7 @@ public final class FileNavigatorImpl implements FileNavigator {
 
     private final org.slf4j.Logger log;
 
-    private final int THREAD_POOL_SIZE = 5;
+    private final int THREAD_POOL_SIZE = 1;
 
     private ExecutorService fileTraverseSingleExecutorReference;
 
@@ -210,7 +210,7 @@ throws IOException {
                 executorDirectoriesReference.close();
                 fileTraverseSingleExecutorReference.close();
                 log.debug("Closed executorDirectoriesReference");
-                 log.debug("Closed fileTraverseSingleExecutorReference");
+                log.debug("Closed fileTraverseSingleExecutorReference");
             }
 
         }
@@ -241,8 +241,8 @@ throws IOException {
                 Thread.currentThread().interrupt(); // Preserve interrupt status
             }
             finally{
-                log.debug("Closed easyFileTraverseSingleExecutorReference");
                   easyFileTraverseSingleExecutorReference.close();
+                  log.debug("Closed easyFileTraverseSingleExecutorReference");
             }
 
         }

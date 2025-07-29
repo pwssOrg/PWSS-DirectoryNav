@@ -17,6 +17,10 @@ import org.junit.jupiter.api.Test;
 import org.pwss.FileNavigator;
 import org.pwss.FileNavigatorImpl;
 
+
+import org.pwss.FileNavigator;
+import org.pwss.FileNavigatorImpl;
+
 public class FileNavigatorTest {
 
     @Test
