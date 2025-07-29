@@ -38,7 +38,7 @@ public final class FileNavigatorImpl implements FileNavigator {
 
     private final org.slf4j.Logger log;
 
-    private final int THREAD_POOL_SIZE = 1;
+    private final int THREAD_POOL_SIZE = 5;
 
     private ExecutorService fileTraverseSingleExecutorReference;
 
