@@ -36,7 +36,6 @@ To include this library in your project, add the following dependency to your `p
 #### Retrieving a Future List of File
 
 ```java
-
 import org.pwss.io_file.FileTraverser;
 import org.pwss.io_file.FileTraverserImpl;
 
@@ -47,11 +46,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class Main {
-    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
+    public static void main(String[] args) throws IOException,
+            ExecutionException,
+            InterruptedException {
         FileTraverser fileTraverser = new FileTraverserImpl();
 
-        Future<List<File>> future = fileTraverser.traverse("C:\\Users\\PWSS\\" +
-                "Downloads\\ShredChat-master\\ShredChat-master");
+        Future<List<File>> future = fileTraverser
+                .traverse("C:\\Users\\PWSS\\" +
+                        "Downloads\\ShredChat-master\\ShredChat-master");
         while (!future.isDone()) {
 
         }
@@ -65,6 +67,7 @@ public class Main {
         fileTraverser.shutdownThreadPool();
     }
 }
+
 ``` 
 
 #### Retrieving a List of files with no subfolders to the selected folder (static)
@@ -77,15 +80,18 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class Main {
+public class Main6 {
 
-    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
+    public static void main(String[] args) throws IOException,
+            ExecutionException,
+            InterruptedException {
+        File selectedFolder =
+                new File("C:\\Program Files (x86)\\Battle.net");
 
-        File selectedFolder = new File("C:\\Program Files (x86)\\Battle.net");
-
-        List<File> noSubfolderList = PWSSDirectoryNavUtil.GetSelectedFolderWithoutSubFolders(selectedFolder);
-
-        noSubfolderList.forEach(file -> System.out.println(file.getAbsolutePath()));
+        List<File> noSubfolderList = PWSSDirectoryNavUtil
+                .GetSelectedFolderWithoutSubFolders(selectedFolder);
+        noSubfolderList
+                .forEach(file -> System.out.println(file.getAbsolutePath()));
     }
 }
 ```
