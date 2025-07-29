@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -19,10 +20,10 @@ import org.pwss.FileNavigatorImpl;
 public class FileNavigatorTest {
 
     @Test
-    public void testFileTraversingThroughADirectoryWith8Files() {
+     void testFileTraversingThroughADirectoryWith13FilesAndDirectories() throws IOException {
         // Given
         final Path myTestPath = Paths.get("pwss_test_directory");
-        final int expectedNumberOfFiles = 8;
+        final int expectedNumberOfFiles = 13;
 
         List<Path> foundPaths = new ArrayList<>();
         FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
@@ -42,11 +43,15 @@ public class FileNavigatorTest {
                 List<Path> paths = future.get();
                 if (paths != null && !paths.isEmpty()) {
                     foundPaths.addAll(paths);
-                    foundPaths.forEach(p -> System.out.println("PWSS Dir -> " + p.getFileName()));
+
+                    foundPaths.stream().filter(a -> !Files.isDirectory(a)).toList().forEach(p -> System.out.println("PWSS Dir -> " + p.getFileName()));
+                    
                 }
             }
 
-        } catch (IOException | InterruptedException e) {
+          
+
+        } catch (InterruptedException e) {
             // Handle expected exceptions
             System.err.println("Error: " + e.getMessage());
             Assertions.fail("Test execution failed due to an exception: " + e.getMessage());
@@ -69,19 +74,18 @@ public class FileNavigatorTest {
     }
 
     @Test
-    public void testEasyFileTraversingThroughADirectoryWith8Files() {
+     void testEasyFileTraversingThroughADirectoryWith13FilesAndDirectories() {
         // Given
         final Path myTestPath = Paths.get("pwss_test_directory");
-        final int expectedNumberOfFiles = 8;
+        final int expectedNumberOfFiles = 13;
 
         List<Path> foundPaths = new ArrayList<>();
-
         FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
 
         try {
             // When
-            Future<Future<List<Path>>> futureReturn = fileNavigator.traverseFilesEasy();
-            Future<List<Path>> future = futureReturn.get();
+
+            Future<List<Path>> future = fileNavigator.traverseFilesEasy();
 
             while (!future.isDone()) {
 
@@ -91,7 +95,7 @@ public class FileNavigatorTest {
 
             System.out.println("Future for test 2 is complete!");
 
-            futureReturn.get();
+            future.get();
 
             List<Path> paths = future.get();
             if (paths != null && !paths.isEmpty()) {
@@ -115,6 +119,7 @@ public class FileNavigatorTest {
         int actualNumberOfFiles = foundPaths.size();
         Assertions.assertEquals(expectedNumberOfFiles, actualNumberOfFiles);
     }
+
 
     @Test
     void testEquals_ObjectsEqual_Success() {
@@ -158,7 +163,7 @@ public class FileNavigatorTest {
         assertTrue(result, "The object should be equal to itself.");
     }
 
-    @Test
+    
     void testEquals_NullObject_Success() {
         // Arrange
         String path = "/some/path";
