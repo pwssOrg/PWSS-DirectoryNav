@@ -43,15 +43,17 @@ import java.util.concurrent.Future;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        Path myTestPath = Paths.get("C:\\Users\\PWSS\\Downloads\\ShredChat-master\\ShredChat-master");
-        FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
         
+        Path myTestPath = Paths.get("C:\\Users\\PWSS\\Downloads\\ShredChat-master\\ShredChat-master");
+        
+        FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
+
         try {
             Future<List<Future<List<Path>>>> futures = fileNavigator.traverseFiles();
             while (!futures.isDone()) {
                 System.out.println("Future working :) ...");
             }
-            System.out.println("Future  has been good :) !");
+            System.out.println("Future has been good :) !");
 
             Future<List<Path>> futureListOfPaths = futures.get().get(0);
 
@@ -76,12 +78,14 @@ public class Main {
              */
 
             //List<Path> listOfPaths = futureListOfPaths.get().stream().filter(a -> !Files.isDirectory(a)).toList();
-
-            System.out.println("Path Size including all folders and files ( +1 initial / selected folder) -> "
+            
+            System.out.println("Path Size including all folders and files" +
+                    " ( +1 initial / selected folder) -> "
                     + pathList.size());
             System.out.println("Path Size including only Files -> " + pathList.stream()
                     .filter(only_files -> !Files.isDirectory(only_files)).toList().size());
-            System.out.println("Path Size including all folders and files (except the initial / selected folder) -> "
+            System.out.println("Path Size including all folders and files" +
+                    " (except the initial / selected folder) -> "
                     + (pathList.size() - 1));
 
         } catch (InterruptedException | ExecutionException e) {
