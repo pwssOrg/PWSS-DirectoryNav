@@ -25,7 +25,7 @@ To include this library in your project, add the following dependency to your `p
 <dependency>
   <groupId>lib.pwss</groupId>
   <artifactId>directory_nav</artifactId>
-  <version>1.2</version>
+  <version>1.2.future</version>
 </dependency>
 ```
 
@@ -44,7 +44,7 @@ import java.util.concurrent.Future;
 public class Main {
     public static void main(String[] args) throws IOException {
 
-        Path myTestPath = Paths.get("C:\\Users\\snow_\\" +
+        Path myTestPath = Paths.get("C:\\Users\\PWSS\\" +
                 "Downloads\\ShredChat-master\\ShredChat-master");
 
         FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
