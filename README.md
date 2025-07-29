@@ -102,6 +102,9 @@ public class Main6 {
 
 
 ``` java
+import org.pwss.path.FileNavigator;
+import org.pwss.path.FileNavigatorImpl;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -113,7 +116,8 @@ import java.util.concurrent.Future;
 public class Main {
     public static void main(String[] args) throws IOException {
 
-        Path myTestPath = Paths.get("C:\\Users\\PWSS\\Downloads\\ShredChat-master\\ShredChat-master");
+        Path myTestPath = Paths.get("C:\\Users\\PWSS" +
+                "\\Downloads\\ShredChat-master\\ShredChat-master");
 
         FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
 
@@ -130,19 +134,24 @@ public class Main {
 
             // Print all folders and directories (including the start folder)
             futures.get().stream()
-                    .forEach(element -> System.out.println(element.toFile().getAbsolutePath()));
+                    .forEach(element -> System.out.println(element.toFile()
+                            .getAbsolutePath()));
 
 
             System.out.println("Path Size including all folders and files" +
                     " ( +1 initial / selected folder) -> "
                     + pathList.size());
-            System.out.println("Path Size including only Files -> " + pathList.stream()
-                    .filter(only_files -> !Files.isDirectory(only_files)).toList().size());
+            System.out.println("Path Size including only Files -> "
+                    + pathList.stream()
+                    .filter(only_files -> !Files.isDirectory(only_files))
+                    .toList()
+                    .size());
             System.out.println("Path Size including all folders and files" +
                     " (except the initial / selected folder) -> "
                     + (pathList.size() - 1));
 
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException
+                 | ExecutionException e) {
             e.printStackTrace();
         } finally {
             // Must be called after all futures have either been retrieved or canceled.
@@ -150,8 +159,6 @@ public class Main {
         }
     }
 }
-
-
 ```
 
 <img src="https://github.com/pwssOrg/PWSS-DirectoryNav/blob/main/.github/assets/images/Jennifer_Burk_a-desert-road-winds-between-red-rock-formations_640x959.jpg" alt="drawing" width="640" height=959/>
