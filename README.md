@@ -43,9 +43,10 @@ import java.util.concurrent.Future;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        
-        Path myTestPath = Paths.get("C:\\Users\\PWSS\\Downloads\\ShredChat-master\\ShredChat-master");
-        
+
+        Path myTestPath = Paths.get("C:\\Users\\snow_\\" +
+                "Downloads\\ShredChat-master\\ShredChat-master");
+
         FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
 
         try {
@@ -53,7 +54,7 @@ public class Main {
             while (!futures.isDone()) {
                 System.out.println("Future working :) ...");
             }
-            System.out.println("Future has been good :) !");
+            System.out.println("Future  has been good :) !");
 
             Future<List<Path>> futureListOfPaths = futures.get().get(0);
 
@@ -62,7 +63,8 @@ public class Main {
 
             // Print all folders and directories (including the start folder)
             futureListOfPaths.get().stream()
-                    .forEach(element -> System.out.println(element.toFile().getAbsolutePath()));
+                    .forEach(element -> System.out.println(element.toFile()
+                            .getAbsolutePath()));
 
             /***
              * If you want to print out the absolute paths of the files without any directories
@@ -77,8 +79,9 @@ public class Main {
              * In case you want to have a list of all paths
              */
 
-            //List<Path> listOfPaths = futureListOfPaths.get().stream().filter(a -> !Files.isDirectory(a)).toList();
-            
+            //List<Path> listOfPaths = futureListOfPaths.get().stream()
+            // .filter(a -> !Files.isDirectory(a)).toList();
+
             System.out.println("Path Size including all folders and files" +
                     " ( +1 initial / selected folder) -> "
                     + pathList.size());
