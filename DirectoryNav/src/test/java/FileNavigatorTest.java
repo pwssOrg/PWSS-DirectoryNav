@@ -14,20 +14,17 @@ import java.util.concurrent.Future;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pwss.FileNavigator;
-import org.pwss.FileNavigatorImpl;
-
-
-import org.pwss.FileNavigator;
-import org.pwss.FileNavigatorImpl;
+import org.pwss.path.FileNavigator;
+import org.pwss.path.FileNavigatorImpl;
 
 public class FileNavigatorTest {
 
     @Test
-     void testFileTraversingThroughADirectoryWith13FilesAndDirectories() throws IOException {
+    void testFileTraversingThroughADirectoryWith13FilesAndDirectories() throws IOException {
         // Given
         final Path myTestPath = Paths.get("pwss_test_directory");
-        final int expectedNumberOfFiles = 13;
+        final int expectedNumberOfFiles = 13; // Files (including directories) + the start path dir
+                                              // (pwss_test_directory)
 
         List<Path> foundPaths = new ArrayList<>();
         FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
@@ -48,12 +45,11 @@ public class FileNavigatorTest {
                 if (paths != null && !paths.isEmpty()) {
                     foundPaths.addAll(paths);
 
-                    foundPaths.stream().filter(a -> !Files.isDirectory(a)).toList().forEach(p -> System.out.println("PWSS Dir -> " + p.getFileName()));
-                    
+                    foundPaths.stream().filter(a -> !Files.isDirectory(a)).toList()
+                            .forEach(p -> System.out.println("PWSS Dir -> " + p.getFileName()));
+
                 }
             }
-
-          
 
         } catch (InterruptedException e) {
             // Handle expected exceptions
@@ -78,7 +74,7 @@ public class FileNavigatorTest {
     }
 
     @Test
-     void testEasyFileTraversingThroughADirectoryWith13FilesAndDirectories() {
+    void testEasyFileTraversingThroughADirectoryWith13FilesAndDirectories() {
         // Given
         final Path myTestPath = Paths.get("pwss_test_directory");
         final int expectedNumberOfFiles = 13;
@@ -124,8 +120,6 @@ public class FileNavigatorTest {
         Assertions.assertEquals(expectedNumberOfFiles, actualNumberOfFiles);
     }
 
-   
-
     @Test
     void testEquals_ObjectsEqual_Success() {
         // Arrange
@@ -168,7 +162,6 @@ public class FileNavigatorTest {
         assertTrue(result, "The object should be equal to itself.");
     }
 
-    
     void testEquals_NullObject_Success() {
         // Arrange
         String path = "/some/path";

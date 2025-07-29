@@ -1,4 +1,4 @@
-package org.pwss;
+package org.pwss.path;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,6 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -25,7 +24,8 @@ import java.util.stream.Stream;
 import org.slf4j.LoggerFactory;
 
 /**
- * The FileNavigatorImpl class provides an implementation of the FileNavigator
+ * The FileNavigatorImpl class provides an implementation of the
+ * {@link FileNavigator}
  * interface.
  * It allows traversing files in a non-recursive, multithreaded manner by
  * accepting
@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
  * designed
  * to handle large directory structures efficiently while providing detailed
  * logging.
+ * 
+ * @apiNote Uses {@link java.nio.file.Path} as traversing strategy
  */
 public final class FileNavigatorImpl implements FileNavigator {
 
@@ -83,82 +85,84 @@ public final class FileNavigatorImpl implements FileNavigator {
     }
 
     @Override
-   public final Future<List<Future<List<Path>>>> traverseFiles() throws IOException, InterruptedException {
-    ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
-    ExecutorService executorOneThread = Executors.newSingleThreadExecutor();
-    final List<Future<List<Path>>> futures = new ArrayList<>();
+    public final Future<List<Future<List<Path>>>> traverseFiles() throws IOException, InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        ExecutorService executorOneThread = Executors.newSingleThreadExecutor();
+        final List<Future<List<Path>>> futures = new ArrayList<>();
 
-    Future<List<Future<List<Path>>>> listFuture = executorOneThread.submit(new Callable<List<Future<List<Path>>>>() {
-
-        @Override
-        public List<Future<List<Path>>> call() {
-            try {
-                final FileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
-                    @Override
-                    public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
-
-                        if(!Files.isDirectory(file))
-                        return FileVisitResult.SKIP_SIBLINGS;
-                        else 
-                        return FileVisitResult.CONTINUE;
-                    }
+        Future<List<Future<List<Path>>>> listFuture = executorOneThread
+                .submit(new Callable<List<Future<List<Path>>>>() {
 
                     @Override
-                    public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
-throws IOException {
+                    public List<Future<List<Path>>> call() {
                         try {
-                            if (true) {
-                                futures.add(executor.submit(() -> {
-                                     List<Path> visitedPaths = new ArrayList<>();
-                                    try (Stream<Path> stream = Files.walk(dir)) {
-                                        
-                                        visitedPaths = stream.filter(a -> !a.startsWith(".")).toList();
-                                          
-                                    } catch (final IOException e) {
-                                        log.error("Error traversing directory: {} - {}", dir, e.getMessage());
+                            final FileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
+                                @Override
+                                public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
+
+                                    if (!Files.isDirectory(file))
+                                        return FileVisitResult.SKIP_SIBLINGS;
+                                    else
+                                        return FileVisitResult.CONTINUE;
+                                }
+
+                                @Override
+                                public FileVisitResult preVisitDirectory(final Path dir,
+                                        final BasicFileAttributes attrs)
+                                        throws IOException {
+                                    try {
+                                        if (true) {
+                                            futures.add(executor.submit(() -> {
+                                                List<Path> visitedPaths = new ArrayList<>();
+                                                try (Stream<Path> stream = Files.walk(dir)) {
+
+                                                    visitedPaths = stream.filter(a -> !a.startsWith(".")).toList();
+
+                                                } catch (final IOException e) {
+                                                    log.error("Error traversing directory: {} - {}", dir,
+                                                            e.getMessage());
+                                                }
+                                                return visitedPaths;
+                                            }));
+                                        }
+                                    } catch (SecurityException se) {
+                                        // Skip directories that we can't access
+                                        log.debug("SecurityException while traversing files: {)", se.getMessage());
+
+                                        return FileVisitResult.SKIP_SIBLINGS;
                                     }
-                                    return visitedPaths;
-                                }));
-                            }
-                        } catch (SecurityException se) {
-                            // Skip directories that we can't access
-                            log.debug("SecurityException while traversing files: {)",se.getMessage());
-                           
-                            return FileVisitResult.SKIP_SIBLINGS;
+                                    return FileVisitResult.CONTINUE;
+                                }
+
+                                @Override
+                                public FileVisitResult visitFileFailed(final Path file, final IOException exc)
+                                        throws IOException {
+                                    log.error("Error accessing file: {} - {}", file, exc.getMessage());
+                                    // Continue traversing even if a file access fails
+                                    return FileVisitResult.CONTINUE;
+                                }
+                            };
+                            Files.walkFileTree(startPath, visitor);
+
+                        } catch (final AccessDeniedException e) {
+                            log.error("Access Denied: {} - {}", startPath, e.getMessage());
+
+                        } catch (final NoSuchFileException e) {
+                            log.error("File Not Found: {} - {}", startPath, e.getMessage());
+                        } catch (final IOException e) {
+                            log.error("IO Exception: {} - {}", startPath, e.getMessage());
+                        } finally {
+                            executorDirectoriesReference = executor;
+                            fileTraverseSingleExecutorReference = executorOneThread;
+
                         }
-                        return FileVisitResult.CONTINUE;
+
+                        return futures;
                     }
+                });
 
-                    @Override
-                    public FileVisitResult visitFileFailed(final Path file, final IOException exc)
-                                throws IOException {
-                        log.error("Error accessing file: {} - {}", file, exc.getMessage());
-                        // Continue traversing even if a file access fails
-                        return FileVisitResult.CONTINUE;
-                    }
-                };
-             Files.walkFileTree(startPath, visitor);
-              
-
-            } catch (final AccessDeniedException e) {
-                log.error("Access Denied: {} - {}", startPath, e.getMessage());
-
-            } catch (final NoSuchFileException e) {
-                log.error("File Not Found: {} - {}", startPath, e.getMessage());
-            } catch (final IOException e) {
-                log.error("IO Exception: {} - {}", startPath, e.getMessage());
-            } finally {
-                executorDirectoriesReference = executor;
-                fileTraverseSingleExecutorReference = executorOneThread;
-                
-            }
-
-            return futures;
-        }
-    });
-
-    return listFuture;
-}
+        return listFuture;
+    }
 
     @Override
     public final Future<List<Path>> traverseFilesEasy()
@@ -172,7 +176,7 @@ throws IOException {
             public List<Path> call() throws Exception {
                 // Get all futures from the original traversal method
                 Future<List<Future<List<Path>>>> futures1 = traverseFiles();
-                return  futures1.get().get(0).get();
+                return futures1.get().get(0).get();
             }
         });
 
@@ -193,12 +197,12 @@ throws IOException {
                     log.warn("Executor did not terminate within the expected time frame.");
                 }
 
-                if(fileTraverseSingleExecutorReference != null){
+                if (fileTraverseSingleExecutorReference != null) {
                     fileTraverseSingleExecutorReference.shutdownNow();
-                   result2 = fileTraverseSingleExecutorReference.awaitTermination(60, TimeUnit.SECONDS);
-                     if (!result2) {
-                    log.warn("Executor did not terminate within the expected time frame.");
-                }
+                    result2 = fileTraverseSingleExecutorReference.awaitTermination(60, TimeUnit.SECONDS);
+                    if (!result2) {
+                        log.warn("Executor did not terminate within the expected time frame.");
+                    }
                 }
 
             } catch (InterruptedException e) {
@@ -206,7 +210,7 @@ throws IOException {
                 Thread.currentThread().interrupt(); // Preserve interrupt status
             }
 
-            finally{
+            finally {
                 executorDirectoriesReference.close();
                 fileTraverseSingleExecutorReference.close();
                 log.debug("Closed executorDirectoriesReference");
@@ -229,7 +233,7 @@ throws IOException {
         Boolean result = null;
         if (easyFileTraverseSingleExecutorReference != null) {
             easyFileTraverseSingleExecutorReference.shutdownNow();
-          
+
             try {
                 // This will block until all tasks have completed execution
                 result = easyFileTraverseSingleExecutorReference.awaitTermination(60, TimeUnit.SECONDS);
@@ -239,10 +243,9 @@ throws IOException {
             } catch (InterruptedException e) {
                 log.error("Interrupted while waiting for executor to shut down: {}", e.getMessage());
                 Thread.currentThread().interrupt(); // Preserve interrupt status
-            }
-            finally{
-                  easyFileTraverseSingleExecutorReference.close();
-                  log.debug("Closed easyFileTraverseSingleExecutorReference");
+            } finally {
+                easyFileTraverseSingleExecutorReference.close();
+                log.debug("Closed easyFileTraverseSingleExecutorReference");
             }
 
         }
