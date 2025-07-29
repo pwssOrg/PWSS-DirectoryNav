@@ -40,7 +40,7 @@ public interface FileNavigator {
      *                              waiting
      *                              for the completion of a subtask.
      */
-    Future<List<Future<List<Path>>>> traverseFiles() throws IOException, InterruptedException;
+    Future<List<Future<List<Path>>>> traverseFiles() throws InterruptedException,IOException;
 
     /**
      * Traverses files in a non-recursive (Java method) manner using an executor
@@ -55,7 +55,7 @@ public interface FileNavigator {
      * directories within the chosen directory have been traversed.
      *
      * @return A future that represents the result of traversing the file system.
-     *         The future contains a future that contains a list of file paths (Path
+     *         The future contains a list of file paths (Path
      *         objects) found during
      *         the traversal.
      * @throws IOException          if an I/O error occurs while reading from or
@@ -65,7 +65,7 @@ public interface FileNavigator {
      *                              waiting
      *                              for the completion of the task.
      */
-    Future<Future<List<Path>>> traverseFilesEasy() throws IOException, InterruptedException, ExecutionException;
+    Future<List<Path>> traverseFilesEasy() throws IOException, InterruptedException, ExecutionException;
 
     /**
      * This method should be invoked after all futures have been retrieved from the
