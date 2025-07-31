@@ -25,7 +25,7 @@ public record PWSSDirectoryNavUtil() {
      *                              cannot be listed
      */
     public static List<File> GetSelectedFolderWithoutSubFolders(File selectedFolder) {
-        return Arrays.stream(Objects.requireNonNull(selectedFolder.listFiles())).toList();
+        return Objects.requireNonNull(processFiles(selectedFolder));
     }
 
     /**
@@ -51,9 +51,8 @@ public record PWSSDirectoryNavUtil() {
 
                 try {
                     listOfFiles.add(entry);
-                } catch (Exception e) {
-
-                }
+                } catch (SecurityException | NullPointerException e) {
+                    System.err.println("Error processing entry: " + entry.getName() + " - " + e.getMessage());
             }
         }
         return listOfFiles;

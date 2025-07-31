@@ -103,9 +103,9 @@ final class FileTraverseWorker implements Callable<List<File>> {
     public List<File> call() {
         while (!directories.isEmpty()) {
 
-            if (!directories.isEmpty()) {
+           
                 processFiles(directories.getFirst());
-            }
+            
         }
 
         return files;
