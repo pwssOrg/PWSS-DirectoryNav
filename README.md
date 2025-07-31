@@ -25,7 +25,7 @@ To include this library in your project, add the following dependency to your `p
 <dependency>
   <groupId>lib.pwss</groupId>
   <artifactId>directory_nav</artifactId>
-  <version>1.3.future</version>
+  <version>1.4</version>
 </dependency>
 ```
 
