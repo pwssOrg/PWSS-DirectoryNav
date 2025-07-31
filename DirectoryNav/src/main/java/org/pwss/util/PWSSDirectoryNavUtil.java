@@ -53,7 +53,9 @@ public record PWSSDirectoryNavUtil() {
                     listOfFiles.add(entry);
                 } catch (SecurityException | NullPointerException e) {
                     System.err.println("Error processing entry: " + entry.getName() + " - " + e.getMessage());
+                }
             }
+
         }
         return listOfFiles;
     }
