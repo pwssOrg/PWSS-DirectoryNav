@@ -1,4 +1,4 @@
-package org.pwss;
+package org.pwss.path;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
  * directory structures
  * efficiently, preventing stack overflow errors that can occur with recursive
  * traversal.
+ * @apiNote Uses Java.Nio 
  */
 public interface FileNavigator {
 

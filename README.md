@@ -25,14 +25,81 @@ To include this library in your project, add the following dependency to your `p
 <dependency>
   <groupId>lib.pwss</groupId>
   <artifactId>directory_nav</artifactId>
-  <version>1.2.future</version>
+  <version>1.4.1</version>
 </dependency>
 ```
 
-### Basic Usage
-Here is a simple example of how to use the library:
+## Basic Usage
+
+### java.io.File
+
+#### Retrieving a Future List of File
 
 ```java
+import org.pwss.io_file.FileTraverser;
+import org.pwss.io_file.FileTraverserImpl;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+public class Main {
+    public static void main(String[] args) throws IOException,
+            ExecutionException,
+            InterruptedException {
+        FileTraverser fileTraverser = new FileTraverserImpl();
+
+        Future<List<File>> future = fileTraverser
+                .traverse("C:\\Users\\PWSS\\" +
+                        "Downloads\\ShredChat-master\\ShredChat-master");
+        while (!future.isDone()) {
+
+        }
+        List<File> fileList = future.get();
+        fileList.forEach(f -> System.out.println(f.getAbsolutePath()));
+        fileTraverser.shutdownThreadPool();
+    }
+}
+
+``` 
+
+#### Retrieving a List of files with no subfolders to the selected folder (static)
+
+```java
+import org.pwss.util.PWSSDirectoryNavUtil;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+public class Main {
+
+    public static void main(String[] args) throws IOException,
+            ExecutionException,
+            InterruptedException {
+        File selectedFolder =
+                new File("C:\\Program Files (x86)\\Battle.net");
+
+        List<File> noSubfolderList = PWSSDirectoryNavUtil
+                .GetSelectedFolderWithoutSubFolders(selectedFolder);
+        noSubfolderList
+                .forEach(file -> System.out.println(file.getAbsolutePath()));
+    }
+}
+```
+
+### java.nio.file.Path
+
+#### Retrieving a Future List of Path
+
+
+``` java
+import org.pwss.path.FileNavigator;
+import org.pwss.path.FileNavigatorImpl;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,54 +111,42 @@ import java.util.concurrent.Future;
 public class Main {
     public static void main(String[] args) throws IOException {
 
-        Path myTestPath = Paths.get("C:\\Users\\PWSS\\" +
-                "Downloads\\ShredChat-master\\ShredChat-master");
+        Path myTestPath = Paths.get("C:\\Users\\PWSS" +
+                "\\Downloads\\ShredChat-master\\ShredChat-master");
 
         FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
 
         try {
-            Future<List<Future<List<Path>>>> futures = fileNavigator.traverseFiles();
+            Future<List<Path>> futures = fileNavigator.traverseFilesEasy();
             while (!futures.isDone()) {
                 System.out.println("Future working :) ...");
             }
-            System.out.println("Future  has been good :) !");
+            System.out.println("Future has been good :) !");
 
-            Future<List<Path>> futureListOfPaths = futures.get().get(0);
 
             // Get Future
-            List<Path> pathList = futureListOfPaths.get();
+            List<Path> pathList = futures.get();
 
             // Print all folders and directories (including the start folder)
-            futureListOfPaths.get().stream()
+            futures.get().stream()
                     .forEach(element -> System.out.println(element.toFile()
                             .getAbsolutePath()));
 
-            /***
-             * If you want to print out the absolute paths of the files without any directories
-             */
-
-            //futureListOfPaths.get().stream()
-            // .filter(a -> !Files.isDirectory(a))
-            // .forEach(element -> System.out.println(element.toFile()
-            // .getAbsolutePath()));
-
-            /**
-             * In case you want to have a list of all paths
-             */
-
-            //List<Path> listOfPaths = futureListOfPaths.get().stream()
-            // .filter(a -> !Files.isDirectory(a)).toList();
 
             System.out.println("Path Size including all folders and files" +
                     " ( +1 initial / selected folder) -> "
                     + pathList.size());
-            System.out.println("Path Size including only Files -> " + pathList.stream()
-                    .filter(only_files -> !Files.isDirectory(only_files)).toList().size());
+            System.out.println("Path Size including only Files -> "
+                    + pathList.stream()
+                    .filter(only_files -> !Files.isDirectory(only_files))
+                    .toList()
+                    .size());
             System.out.println("Path Size including all folders and files" +
                     " (except the initial / selected folder) -> "
                     + (pathList.size() - 1));
 
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException
+                 | ExecutionException e) {
             e.printStackTrace();
         } finally {
             // Must be called after all futures have either been retrieved or canceled.
@@ -100,7 +155,6 @@ public class Main {
     }
 }
 ```
-
 
 <img src="https://github.com/pwssOrg/PWSS-DirectoryNav/blob/main/.github/assets/images/Jennifer_Burk_a-desert-road-winds-between-red-rock-formations_640x959.jpg" alt="drawing" width="640" height=959/>
 <i>Always traverse quickly and gracefully - only then can you achieve full file integrity
