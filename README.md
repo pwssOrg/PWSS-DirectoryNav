@@ -25,7 +25,7 @@ To include this library in your project, add the following dependency to your `p
 <dependency>
   <groupId>lib.pwss</groupId>
   <artifactId>directory_nav</artifactId>
-  <version>1.3.future</version>
+  <version>1.4</version>
 </dependency>
 ```
 
@@ -58,11 +58,6 @@ public class Main {
 
         }
         List<File> fileList = future.get();
-
-        while (!future.isDone()) {
-
-            System.out.println("Waiting for future");
-        }
         fileList.forEach(f -> System.out.println(f.getAbsolutePath()));
         fileTraverser.shutdownThreadPool();
     }
@@ -80,7 +75,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class Main6 {
+public class Main {
 
     public static void main(String[] args) throws IOException,
             ExecutionException,
