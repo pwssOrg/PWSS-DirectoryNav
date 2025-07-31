@@ -48,6 +48,8 @@ public class FileTraverserTest {
         }
         List<File> fileList = future.get();
 
+        fileTraverser.shutdownThreadPool();
+
         Assertions.assertEquals(expectedNumberOfFiles, fileList.size());
 
     }
@@ -63,6 +65,8 @@ public class FileTraverserTest {
 
         }
         List<File> fileList = future.get();
+
+        fileTraverser.shutdownThreadPool();
 
         Assertions.assertEquals(expectedNumberOfFiles, fileList.size());
 
@@ -80,7 +84,49 @@ public class FileTraverserTest {
         }
         List<File> fileList = future.get();
 
+        fileTraverser.shutdownThreadPool();
+
         Assertions.assertEquals(expectedNumberOfFiles, fileList.size());
+
+    }
+
+    @Test
+    void testParallelExecutionTraversing() throws InterruptedException, ExecutionException {
+
+        // Given
+
+        File startPath2 = new File("test_data");
+
+        FileTraverser fileTraverser = new FileTraverserImpl();
+
+        Future<List<File>> future = fileTraverser
+                .traverse(startPath);
+
+        Future<List<File>> future2 = fileTraverser.traverse(startPath2);
+
+        while (true) {
+
+            if (future2.isDone()) {
+
+                future.cancel(true);
+                break;
+
+            }
+
+            if (future.isDone()) {
+                future2.cancel(true);
+                break;
+            }
+
+        }
+
+        System.out.println(
+                "Future 1_____________\nisdone -> " + future.isDone() + "\nisCancelled -> " + future.isCancelled());
+        System.out.println(
+                "Future 2______________\nisdone -> " + future2.isDone() + "\nisCancelled -> " + future2.isCancelled());
+        fileTraverser.shutdownThreadPool();
+
+        Assertions.assertEquals(true, future2.isCancelled());
 
     }
 }

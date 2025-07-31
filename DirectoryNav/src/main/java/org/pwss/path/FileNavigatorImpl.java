@@ -40,7 +40,7 @@ public final class FileNavigatorImpl implements FileNavigator {
 
     private final org.slf4j.Logger log;
 
-    private final int THREAD_POOL_SIZE = 5;
+    private final int THREAD_POOL_SIZE = 1;
 
     private ExecutorService fileTraverseSingleExecutorReference;
 
@@ -190,6 +190,7 @@ public final class FileNavigatorImpl implements FileNavigator {
         Boolean result2 = null;
         if (executorDirectoriesReference != null) {
             executorDirectoriesReference.shutdownNow();
+            executorDirectoriesReference.close();
             try {
                 // This will block until all tasks have completed execution
                 result = executorDirectoriesReference.awaitTermination(60, TimeUnit.SECONDS);
@@ -203,6 +204,8 @@ public final class FileNavigatorImpl implements FileNavigator {
                     if (!result2) {
                         log.warn("Executor did not terminate within the expected time frame.");
                     }
+
+                    fileTraverseSingleExecutorReference.close();
                 }
 
             } catch (InterruptedException e) {
