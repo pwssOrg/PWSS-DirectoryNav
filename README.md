@@ -58,11 +58,6 @@ public class Main {
 
         }
         List<File> fileList = future.get();
-
-        while (!future.isDone()) {
-
-            System.out.println("Waiting for future");
-        }
         fileList.forEach(f -> System.out.println(f.getAbsolutePath()));
         fileTraverser.shutdownThreadPool();
     }
