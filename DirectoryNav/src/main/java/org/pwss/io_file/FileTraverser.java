@@ -14,7 +14,7 @@ import java.util.concurrent.Future;
  * implementation that takes
  * a File object. Additionally, it provides a method to shut down thread pools
  * and close resources.
- * @apiNote Uses {@link java.io.File} as traversing strategy
+ * Uses {@link java.io.File} as traversing strategy
  */
 public interface FileTraverser {
 

@@ -6,7 +6,7 @@
 
     <groupId>lib.pwss</groupId>
     <artifactId>directory_nav</artifactId>
-    <version>1.4.1</version>
+    <version>1.5</version>
     <description>This library provides functionality to traverse files within a specified directory and its subdirectories. 
 </description>
 
@@ -52,4 +52,23 @@
     <scope>test</scope>
 </dependency>
     </dependencies>
+
+
+    <build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.11.2</version>
+            <executions>
+                <execution>
+                    <id>attach-javadocs</id>
+                    <goals>
+                        <goal>jar</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
 </project>
