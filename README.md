@@ -25,7 +25,7 @@ To include this library in your project, add the following dependency to your `p
 <dependency>
   <groupId>lib.pwss</groupId>
   <artifactId>directory_nav</artifactId>
-  <version>1.4.1</version>
+  <version>1.5</version>
 </dependency>
 ```
 
@@ -90,71 +90,17 @@ public class Main {
     }
 }
 ```
+### API Documentation
 
-### java.nio.file.Path
+For detailed information about our classes, methods, and their usage, please visit the Javadoc:
 
-#### Retrieving a Future List of Path
+[Link to API Docs](https://pwssorg.github.io/PWSS-DirectoryNav-JavaDocs/)
 
+The Javadocs provide comprehensive documentation for all public APIs in this project, including:
+- Class descriptions
+- Method details with parameters and return types
+- Example usages when available
 
-``` java
-import org.pwss.path.FileNavigator;
-import org.pwss.path.FileNavigatorImpl;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
-public class Main {
-    public static void main(String[] args) throws IOException {
-
-        Path myTestPath = Paths.get("C:\\Users\\PWSS" +
-                "\\Downloads\\ShredChat-master\\ShredChat-master");
-
-        FileNavigator fileNavigator = new FileNavigatorImpl(myTestPath);
-
-        try {
-            Future<List<Path>> futures = fileNavigator.traverseFilesEasy();
-            while (!futures.isDone()) {
-                System.out.println("Future working :) ...");
-            }
-            System.out.println("Future has been good :) !");
-
-
-            // Get Future
-            List<Path> pathList = futures.get();
-
-            // Print all folders and directories (including the start folder)
-            futures.get().stream()
-                    .forEach(element -> System.out.println(element.toFile()
-                            .getAbsolutePath()));
-
-
-            System.out.println("Path Size including all folders and files" +
-                    " ( +1 initial / selected folder) -> "
-                    + pathList.size());
-            System.out.println("Path Size including only Files -> "
-                    + pathList.stream()
-                    .filter(only_files -> !Files.isDirectory(only_files))
-                    .toList()
-                    .size());
-            System.out.println("Path Size including all folders and files" +
-                    " (except the initial / selected folder) -> "
-                    + (pathList.size() - 1));
-
-        } catch (InterruptedException
-                 | ExecutionException e) {
-            e.printStackTrace();
-        } finally {
-            // Must be called after all futures have either been retrieved or canceled.
-            fileNavigator.shutdownDirectoryNavThreadPool();
-        }
-    }
-}
-```
 
 <img src="https://github.com/pwssOrg/PWSS-DirectoryNav/blob/main/.github/assets/images/Jennifer_Burk_a-desert-road-winds-between-red-rock-formations_640x959.jpg" alt="drawing" width="640" height=959/>
 <i>Always traverse quickly and gracefully - only then can you achieve full file integrity

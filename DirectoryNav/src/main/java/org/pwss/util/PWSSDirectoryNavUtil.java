@@ -6,6 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Logger;
+
 /**
  * The PWSSDirectoryNavUtil class provides utility methods to work with
  * directories.
@@ -14,6 +18,8 @@ import java.util.Objects;
  * navigation.
  */
 public record PWSSDirectoryNavUtil() {
+
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(PWSSDirectoryNavUtil.class);
 
     /**
      * Retrieves the contents of the selected folder without including subfolders.
@@ -52,7 +58,7 @@ public record PWSSDirectoryNavUtil() {
                 try {
                     listOfFiles.add(entry);
                 } catch (SecurityException | NullPointerException e) {
-                    System.err.println("Error processing entry: " + entry.getName() + " - " + e.getMessage());
+                    log.error("Error processing entry: {} - {}" +entry.getName(),e.getMessage());
                 }
             }
 

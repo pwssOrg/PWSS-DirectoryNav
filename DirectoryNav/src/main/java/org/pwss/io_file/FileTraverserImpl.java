@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * {@link FileTraverser}
  * interface.
  * 
- * @apiNote Uses {@link java.io.File} as traversing strategy
+ * Uses {@link java.io.File} as traversing strategy
  */
 public final class FileTraverserImpl implements FileTraverser {
 
@@ -24,6 +24,11 @@ public final class FileTraverserImpl implements FileTraverser {
     private final org.slf4j.Logger log;
     private final int THREAD_POOL_SIZE = 100;
 
+    /**
+     * Constructs a new instance of the {@code FileTraverserImpl} class.
+     * Initializes an executor service with a fixed thread pool size and
+     * sets up a logger for this implementation.
+     */
     public FileTraverserImpl() {
 
         executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
