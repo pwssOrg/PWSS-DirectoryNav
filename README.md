@@ -94,7 +94,7 @@ public class Main {
 
 For detailed information about our classes, methods, and their usage, please visit the Javadoc:
 
-[Link to API Docs](./apidocs/index.html)
+[Link to API Docs](https://pwssorg.github.io/PWSS-DirectoryNav-JavaDocs/)
 
 The Javadocs provide comprehensive documentation for all public APIs in this project, including:
 - Class descriptions
