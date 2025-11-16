@@ -23,7 +23,7 @@ public class FileTraverserTest {
         fileTraverser.shutdownThreadPool();
 
         try {
-            Future<List<File>> future = fileTraverser.traverse(new File(startPath));
+            fileTraverser.traverse(new File(startPath));
         } catch (Exception exception) {
 
             // Handle expected exceptions
