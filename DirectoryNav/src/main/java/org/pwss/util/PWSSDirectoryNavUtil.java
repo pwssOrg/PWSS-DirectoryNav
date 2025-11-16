@@ -2,13 +2,11 @@ package org.pwss.util;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.List;
 import java.util.Objects;
 
 import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.Logger;
 
 /**
  * The PWSSDirectoryNavUtil class provides utility methods to work with
@@ -58,7 +56,7 @@ public record PWSSDirectoryNavUtil() {
                 try {
                     listOfFiles.add(entry);
                 } catch (SecurityException | NullPointerException e) {
-                    log.error("Error processing entry: {} - {}" +entry.getName(),e.getMessage());
+                    log.error("Error processing entry: {} - {}" + entry.getName(), e.getMessage());
                 }
             }
 
