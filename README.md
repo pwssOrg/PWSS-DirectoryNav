@@ -102,7 +102,7 @@ The Javadocs provide comprehensive documentation for all public APIs in this pro
 - Example usages when available
 
 
-<img src="https://github.com/pwssOrg/PWSS-DirectoryNav/blob/main/.github/assets/images/Jennifer_Burk_a-desert-road-winds-between-red-rock-formations_640x959.jpg" alt="drawing" width="640" height=959/>
+<img src="https://github.com/pwssOrg/PWSS-DirectoryNav/blob/master/.github/assets/images/Jennifer_Burk_a-desert-road-winds-between-red-rock-formations_640x959.jpg" alt="drawing" width="640" height=959/>
 <i>Always traverse quickly and gracefully - only then can you achieve full file integrity
 </i>
 
