@@ -37,15 +37,6 @@
         </developer>
     </developers>
 
-
-    <distributionManagement>
-    <repository>
-        <id>ossrh</id>
-        <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-    </distributionManagement>
-
-
     <scm>
         <connection>scm:git:https://github.com/pwssOrg/PWSS-DirectoryNav.git</connection>
         <developerConnection>scm:git:ssh://github.com/pwssOrg/PWSS-DirectoryNav.git</developerConnection>
