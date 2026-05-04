@@ -16,13 +16,27 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>PWSS-DirectoryNav GitHub Maven Repository</name>
-            <url>https://maven.pkg.github.com/pwssOrg/PWSS-DirectoryNav</url>
-        </repository>
-    </distributionManagement>
+  <profiles>
+    <profile>
+        <id>github</id>
+        <distributionManagement>
+            <repository>
+                <id>github</id>
+                <url>https://maven.pkg.github.com/pwssOrg/PWSS-DirectoryNav</url>
+            </repository>
+        </distributionManagement>
+    </profile>
+
+    <profile>
+        <id>central</id>
+        <distributionManagement>
+            <repository>
+                <id>central</id>
+                <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            </repository>
+        </distributionManagement>
+    </profile>
+</profiles>
 
     <developers>
     <developer>
