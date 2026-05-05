@@ -1,32 +1,35 @@
 # Define the pom directory path
 POM_DIR := DirectoryNav
 
-# Default target
 .PHONY: all
 all:
 	@echo "Please use 'make build' to build the project."
 
-# Build target
+# Build (local, using GPG)
 .PHONY: build
 build:
 	cd $(POM_DIR) && mvn clean install
 
-# Test target
+# Build for GitHub (no GPG)
+.PHONY: github_build
+github_build:
+	cd $(POM_DIR) && mvn -B -Dgpg.skip=true clean install
+
+# Test
 .PHONY: test
 test:
 	cd $(POM_DIR) && mvn clean test
 
-# Clean target
+# Clean
 .PHONY: clean
 clean:
 	cd $(POM_DIR) && mvn clean
 
-
-# Help target
+# Help
 .PHONY: help
 help:
 	@echo "Available targets:"
-	@echo "  make build	- Build the project using Maven"
-	@echo "  make test	- Test the project using Maven"
-	@echo "  make clean	- Clean the project using Maven"
-	@echo "  make help	- Display this help message"
+	@echo "  make github_build - Build without GPG (CI)"
+	@echo "  make build        - Build with GPG (local)"
+	@echo "  make test         - Test the project"
+	@echo "  make clean        - Clean the project"

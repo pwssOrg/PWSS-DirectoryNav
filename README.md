@@ -23,7 +23,7 @@ other directory-related operations within the PWSS ecosystem.
 To include this library in your project, add the following dependency to your `pom.xml`:
 ```xml
 <dependency>
-  <groupId>lib.pwss</groupId>
+  <groupId>io.github.pwssorg</groupId>
   <artifactId>directory_nav</artifactId>
   <version>1.5.6</version>
 </dependency>
