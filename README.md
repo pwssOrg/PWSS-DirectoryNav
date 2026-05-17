@@ -28,6 +28,7 @@ To include this library in your project, add the following dependency to your `p
   <version>1.5.6</version>
 </dependency>
 ```
+[![MvnRepository](https://badges.mvnrepository.com/badge/io.github.pwssorg/directory_nav/badge.svg?label=MvnRepository)](https://mvnrepository.com/artifact/io.github.pwssorg/directory_nav)
 
 ## Basic Usage
 
@@ -113,4 +114,4 @@ Forum](https://github.com/orgs/pwssOrg/discussions/categories/pwss-directorynav)
 
 ---
 
-© 2025 pwssOrg. All rights reserved.
+© 2026 pwssOrg. All rights reserved.
