@@ -61,6 +61,7 @@ public record PWSSDirectoryNavUtil() {
             }
 
         }
+        listOfFiles.add(selectedFolder); // Add the directory to the file list 
         return listOfFiles;
     }
 }
