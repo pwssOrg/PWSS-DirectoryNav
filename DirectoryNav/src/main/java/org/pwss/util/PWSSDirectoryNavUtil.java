@@ -54,8 +54,8 @@ public record PWSSDirectoryNavUtil() {
             for (File entry : entries) {
 
                 try {
-                    if (!entry.isDirectory())
-                    listOfFiles.add(entry);
+                    if (!entry.isDirectory()){
+                    listOfFiles.add(entry);}
                 } catch (SecurityException | NullPointerException e) {
                     log.error("Error processing entry: {} - {}" + entry.getName(), e.getMessage());
                 }
