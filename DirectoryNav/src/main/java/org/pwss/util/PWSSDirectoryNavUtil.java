@@ -54,6 +54,7 @@ public record PWSSDirectoryNavUtil() {
             for (File entry : entries) {
 
                 try {
+                    if (!entry.isDirectory())
                     listOfFiles.add(entry);
                 } catch (SecurityException | NullPointerException e) {
                     log.error("Error processing entry: {} - {}" + entry.getName(), e.getMessage());
@@ -61,7 +62,6 @@ public record PWSSDirectoryNavUtil() {
             }
 
         }
-        listOfFiles.add(selectedFolder); // Add the directory to the file list 
         return listOfFiles;
     }
 }

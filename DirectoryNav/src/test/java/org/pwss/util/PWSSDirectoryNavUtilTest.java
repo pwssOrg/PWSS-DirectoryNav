@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 public class PWSSDirectoryNavUtilTest {
     
     // Given
-    final int expectedNumberOfFiles = 3 ; // The files and the directories
+    final int expectedNumberOfFiles = 1 ; // The files and the directories
     final String startPath = "pwss_test_directory";
 
     @Test

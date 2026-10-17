@@ -138,7 +138,6 @@ final class FileTraverseWorker implements Callable<List<File>> {
             }
 
         }
-        files.add(folder);
         directories.remove(folder);
     }
 
