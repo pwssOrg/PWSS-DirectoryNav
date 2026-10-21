@@ -25,7 +25,7 @@ To include this library in your project, add the following dependency to your `p
 <dependency>
   <groupId>io.github.pwssorg</groupId>
   <artifactId>directory_nav</artifactId>
-  <version>1.5.6</version>
+  <version>1.5.7</version>
 </dependency>
 ```
 [![MvnRepository](https://badges.mvnrepository.com/badge/io.github.pwssorg/directory_nav/badge.svg?label=MvnRepository)](https://mvnrepository.com/artifact/io.github.pwssorg/directory_nav)

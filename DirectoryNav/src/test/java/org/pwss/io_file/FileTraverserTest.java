@@ -16,6 +16,7 @@ public class FileTraverserTest {
     final String startPath = "pwss_test_directory";
     final int expectedNumberOfFiles = 8; // Only the files and no directories
 
+
     @Test
     void testShutdownThreadPool() {
 
