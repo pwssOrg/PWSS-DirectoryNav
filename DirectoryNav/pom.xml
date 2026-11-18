@@ -14,15 +14,16 @@
     <description>This library provides functionality to traverse files within a specified directory and its subdirectories.</description>
     <url>https://github.com/pwssOrg/PWSS-DirectoryNav</url>
 
- <!-- Maven Central -->
- 
-<licenses>
-  <license>
-    <name>Apache License, Version 2.0</name>
-    <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-    <distribution>repo</distribution>
-  </license>
-</licenses>
+    <!-- Maven Central -->
+
+    <!-- Licenses -->
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/license/mit</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <developers>
         <developer>
