@@ -111,7 +111,3 @@ The Javadocs provide comprehensive documentation for all public APIs in this pro
 
 Please visit our discussion forum for project-related documentation and discussions: [Project Discussion
 Forum](https://github.com/orgs/pwssOrg/discussions/categories/pwss-directorynav)
-
----
-
-© 2026 pwssOrg. All rights reserved.
